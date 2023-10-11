@@ -6,16 +6,27 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "migrate:dev": "npx dotenv -e .env.local -- prisma migrate dev",
+    "db:push": "npx dotenv -e .env.local -- prisma db push",
+    "migrate:reset": "npx dotenv -e .env.local -- prisma migrate reset",
+    "db:seed": "npx dotenv -e .env.local -- prisma db seed",
+    "prisma:generate": "npx dotenv -e .env.local -- prisma generate",
+    "prisma:studio": "npx dotenv -e .env.local -- prisma studio",
+    "production:build": "npx prisma generate && npx prisma migrate deploy && next build"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@mui/material": "^5.14.12",
+    "@prisma/client": "^5.4.2",
+    "dotenv-cli": "^7.3.0",
     "next": "13.5.4",
     "next-auth": "^4.23.2",
+    "prisma": "^5.4.2",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/node": "^20",

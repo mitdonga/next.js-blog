@@ -1,6 +1,13 @@
 import NextAuth, { NextAuthOptions, Session, User } from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 import CredentialsProvider from "next-auth/providers/credentials"
+import Prisma from "@/lib/db"
+import { z } from "zod"
+
+const UserCreds = z.object({
+  email: z.string(),
+  password: z.string()
+});
 
 export const authOptions: NextAuthOptions = {
   // Configure one or more authentication providers
@@ -16,19 +23,22 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials, req) {
-        console.log("Inside Credentials Provider...");
-        // const res = await fetch("/your/endpoint", {
-        //   method: 'POST',
-        //   body: JSON.stringify(credentials),
-        //   headers: { "Content-Type": "application/json" }
-        // })
-        // const user = await res.json()
-  
-        // Return null if user data could not be retrieved
-        return {
-          email: "mitdonga123@gmail.com",
-          id: "1",
-          name: "Mit Donga",
+        try {
+          console.log("Inside Credentials Provider...");
+          const creds = UserCreds.parse(credentials)
+          const user = await Prisma.user.findFirst({
+                          where: { email: creds.email }
+                        })
+          if (user) return { id: user.id.toString(), name: user.name, email: user.email }
+          else {
+            const newUser = await Prisma.user.create({
+              data: { email: creds.email }
+            })
+            return { id: newUser.id.toString(), name: newUser.name, email: newUser.email }
+          }
+        } catch (e) {
+          console.log(e);
+          return null
         }
       }
     })
@@ -54,10 +64,7 @@ export const authOptions: NextAuthOptions = {
         // return '/unauthorized'
       }
     },
-    async session({ session, user }: {session: Session, user: User}) {
-      if (session.user) {
-        session.user.id = "11121dsdsd"
-      }
+    async session({ session, user }: {session: Session, user: User }) {
       console.log("Inside Session Callback......");
       console.log("Session: ",session);
       console.log("User: ",user);
